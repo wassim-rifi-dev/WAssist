@@ -1,44 +1,31 @@
 package dev.wassim.wassist.features.ai.service;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 import dev.wassim.wassist.features.ai.client.OllamaClient;
 import dev.wassim.wassist.features.ai.dto.OllamaMessage;
 import dev.wassim.wassist.features.ai.dto.request.OllamaChatRequest;
 import dev.wassim.wassist.features.ai.dto.response.OllamaChatResponse;
+import dev.wassim.wassist.features.ai.mapper.OllamaMapper;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AgentService {
-        private final RestClient ollamaRestClient;
         private final OllamaClient ollamaClient;
-
-        @Value("${ollama.model}")
-        private String model;
+        private final OllamaMapper ollamaMapper;
 
         public String ask(String prompt) {
-                OllamaMessage ollamaMessage = new OllamaMessage(
-                        "user",
-                        prompt
-                );
+                OllamaMessage ollamaMessage = ollamaMapper.tOllamaMessage(prompt);
 
-                OllamaChatRequest ollamaChatRequest = new OllamaChatRequest(
-                        model,
-                        List.of(ollamaMessage),
-                        false
-                );
+                OllamaChatRequest ollamaChatRequest = ollamaMapper.tOllamaChatRequest(ollamaMessage);
 
-                OllamaChatResponse ollamaChatResponse = ollamaClient.chat(ollamaRestClient, ollamaChatRequest);
+                OllamaChatResponse ollamaChatResponse = ollamaClient.chat(ollamaChatRequest);
 
                 if (ollamaChatResponse == null || ollamaChatResponse.getMessage() == null) {
-                throw new RuntimeException(
-                        "No response received from Ollama"
-                );
+                        throw new RuntimeException(
+                                "No response received from Ollama"
+                        );
                 }
 
                 return ollamaChatResponse
