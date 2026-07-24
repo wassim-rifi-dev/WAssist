@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import dev.wassim.wassist.features.ai.client.OllamaClient;
 import dev.wassim.wassist.features.ai.dto.OllamaMessage;
 import dev.wassim.wassist.features.ai.dto.request.OllamaChatRequest;
 import dev.wassim.wassist.features.ai.dto.response.OllamaChatResponse;
@@ -13,8 +14,9 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class OllamaService {
+public class AgentService {
         private final RestClient ollamaRestClient;
+        private final OllamaClient ollamaClient;
 
         @Value("${ollama.model}")
         private String model;
@@ -31,12 +33,7 @@ public class OllamaService {
                         false
                 );
 
-                OllamaChatResponse ollamaChatResponse = ollamaRestClient
-                        .post()
-                        .uri("/api/chat")
-                        .body(ollamaChatRequest)
-                        .retrieve()
-                        .body(OllamaChatResponse.class);
+                OllamaChatResponse ollamaChatResponse = ollamaClient.chat(ollamaRestClient, ollamaChatRequest);
 
                 if (ollamaChatResponse == null || ollamaChatResponse.getMessage() == null) {
                 throw new RuntimeException(
