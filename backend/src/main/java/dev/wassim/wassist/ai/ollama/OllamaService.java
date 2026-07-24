@@ -1,4 +1,4 @@
-package dev.wassim.wassist.ai;
+package dev.wassim.wassist.ai.ollama;
 
 import org.springframework.stereotype.Service;
 
