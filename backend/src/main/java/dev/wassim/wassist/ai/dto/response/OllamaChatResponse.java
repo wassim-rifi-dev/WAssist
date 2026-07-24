@@ -1,6 +1,6 @@
-package dev.wassim.wassist.features.ai.dto.response;
+package dev.wassim.wassist.ai.dto.response;
 
-import dev.wassim.wassist.features.ai.dto.OllamaMessage;
+import dev.wassim.wassist.ai.dto.OllamaMessage;
 import lombok.Getter;
 
 @Getter

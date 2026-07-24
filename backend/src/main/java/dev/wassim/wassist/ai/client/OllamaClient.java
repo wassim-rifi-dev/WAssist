@@ -1,10 +1,10 @@
-package dev.wassim.wassist.features.ai.client;
+package dev.wassim.wassist.ai.client;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import dev.wassim.wassist.features.ai.dto.request.OllamaChatRequest;
-import dev.wassim.wassist.features.ai.dto.response.OllamaChatResponse;
+import dev.wassim.wassist.ai.dto.request.OllamaChatRequest;
+import dev.wassim.wassist.ai.dto.response.OllamaChatResponse;
 import lombok.RequiredArgsConstructor;
 
 @Component

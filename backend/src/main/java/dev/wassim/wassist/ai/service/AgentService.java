@@ -1,12 +1,12 @@
-package dev.wassim.wassist.features.ai.service;
+package dev.wassim.wassist.ai.service;
 
 import org.springframework.stereotype.Service;
 
-import dev.wassim.wassist.features.ai.client.OllamaClient;
-import dev.wassim.wassist.features.ai.dto.OllamaMessage;
-import dev.wassim.wassist.features.ai.dto.request.OllamaChatRequest;
-import dev.wassim.wassist.features.ai.dto.response.OllamaChatResponse;
-import dev.wassim.wassist.features.ai.mapper.OllamaMapper;
+import dev.wassim.wassist.ai.client.OllamaClient;
+import dev.wassim.wassist.ai.dto.OllamaMessage;
+import dev.wassim.wassist.ai.dto.request.OllamaChatRequest;
+import dev.wassim.wassist.ai.dto.response.OllamaChatResponse;
+import dev.wassim.wassist.ai.mapper.OllamaMapper;
 import lombok.RequiredArgsConstructor;
 
 @Service
