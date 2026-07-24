@@ -2,7 +2,7 @@ package dev.wassim.wassist.features.chat.service;
 
 import org.springframework.stereotype.Service;
 
-import dev.wassim.wassist.ai.ollama.OllamaService;
+import dev.wassim.wassist.features.ai.service.OllamaService;
 import dev.wassim.wassist.features.chat.dto.request.ChatRequest;
 import dev.wassim.wassist.features.chat.dto.response.ChatResponse;
 import dev.wassim.wassist.features.chat.mapper.ChatMapper;
