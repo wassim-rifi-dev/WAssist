@@ -3,11 +3,11 @@ package dev.wassim.wassist.ai.ollama.dto.request;
 import java.util.List;
 
 import dev.wassim.wassist.ai.ollama.dto.OllamaMessage;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
+@AllArgsConstructor
 public class OllamaChatRequest {
     private String model;
     private List<OllamaMessage> messages;
