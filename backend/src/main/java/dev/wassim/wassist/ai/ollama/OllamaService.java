@@ -14,38 +14,38 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class OllamaService {
-    private final RestClient ollamaRestClient;
+        private final RestClient ollamaRestClient;
 
-    @Value("${ollama.model}")
-    private String model;
+        @Value("${ollama.model}")
+        private String model;
 
-    public String ask(String prompt) {
-        OllamaMessage ollamaMessage = new OllamaMessage(
-                "user",
-                prompt
-        );
+        public String ask(String prompt) {
+                OllamaMessage ollamaMessage = new OllamaMessage(
+                        "user",
+                        prompt
+                );
 
-        OllamaChatRequest ollamaChatRequest = new OllamaChatRequest(
-                model,
-                List.of(ollamaMessage),
-                false
-        );
+                OllamaChatRequest ollamaChatRequest = new OllamaChatRequest(
+                        model,
+                        List.of(ollamaMessage),
+                        false
+                );
 
-        OllamaChatResponse ollamaChatResponse = ollamaRestClient
-                .post()
-                .uri("/api/chat")
-                .body(ollamaChatRequest)
-                .retrieve()
-                .body(OllamaChatResponse.class);
+                OllamaChatResponse ollamaChatResponse = ollamaRestClient
+                        .post()
+                        .uri("/api/chat")
+                        .body(ollamaChatRequest)
+                        .retrieve()
+                        .body(OllamaChatResponse.class);
 
-        if (ollamaChatResponse == null || ollamaChatResponse.getMessage() == null) {
-            throw new RuntimeException(
-                    "No response received from Ollama"
-            );
+                if (ollamaChatResponse == null || ollamaChatResponse.getMessage() == null) {
+                throw new RuntimeException(
+                        "No response received from Ollama"
+                );
+                }
+
+                return ollamaChatResponse
+                        .getMessage()
+                        .getContent();
         }
-
-        return ollamaChatResponse
-                .getMessage()
-                .getContent();
-    }
 }
