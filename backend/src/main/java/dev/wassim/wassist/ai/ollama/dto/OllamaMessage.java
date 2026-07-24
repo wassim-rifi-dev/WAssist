@@ -1,4 +1,4 @@
-package dev.wassim.wassist.ai.dto;
+package dev.wassim.wassist.ai.ollama.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

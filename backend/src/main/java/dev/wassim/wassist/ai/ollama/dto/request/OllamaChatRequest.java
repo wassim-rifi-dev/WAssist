@@ -1,8 +1,8 @@
-package dev.wassim.wassist.ai.dto.request;
+package dev.wassim.wassist.ai.ollama.dto.request;
 
 import java.util.List;
 
-import dev.wassim.wassist.ai.dto.OllamaMessage;
+import dev.wassim.wassist.ai.ollama.dto.OllamaMessage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
