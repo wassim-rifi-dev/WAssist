@@ -16,8 +16,7 @@ export default function useSendPrompt() {
 
             const res = await ask(message);
             setPrompt("");
-            setResponse(res.data)
-            return res.data;
+            setResponse(res.response)
         } catch (error) {
             setThinking(false);
             console.error(error);
