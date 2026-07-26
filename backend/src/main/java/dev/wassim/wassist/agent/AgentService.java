@@ -2,7 +2,6 @@ package dev.wassim.wassist.agent;
 
 import org.springframework.stereotype.Service;
 
-import dev.wassim.wassist.common.exceptions.AgentExecutionException;
 import dev.wassim.wassist.domain.conversation.Conversation;
 import dev.wassim.wassist.domain.conversation.ConversationManager;
 import lombok.RequiredArgsConstructor;
@@ -63,10 +62,6 @@ public class AgentService {
 
                 conversationManager.addUserMessage(prompt, conversation);
 
-                agentReasoningEngine.run(conversation);
-
-                throw new AgentExecutionException(
-                        "Agent reached maximum iterations"
-                );
+                return agentReasoningEngine.run(conversation);
         }
 }
