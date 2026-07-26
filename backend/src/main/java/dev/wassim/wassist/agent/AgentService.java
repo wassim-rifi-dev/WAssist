@@ -2,72 +2,71 @@ package dev.wassim.wassist.agent;
 
 import org.springframework.stereotype.Service;
 
-import dev.wassim.wassist.agent.tools.Tool;
-import dev.wassim.wassist.agent.tools.ToolRegistry;
-import dev.wassim.wassist.agent.tools.ToolRequest;
-import dev.wassim.wassist.agent.tools.ToolResult;
-import dev.wassim.wassist.ai.provider.AIProvider;
-import dev.wassim.wassist.domain.dto.response.AgentResponse;
-import dev.wassim.wassist.domain.enums.ResponseType;
+import dev.wassim.wassist.domain.conversation.Conversation;
+import dev.wassim.wassist.domain.conversation.ConversationManager;
+import dev.wassim.wassist.domain.dto.AgentMessage;
+import dev.wassim.wassist.domain.enums.MessageRoles;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AgentService {
-        private final AIProvider aiProvider;
-        private final ToolRegistry toolRegistry;
+        private final ConversationManager conversationManager;
+        private final AgentReasoningEngine agentReasoningEngine;
 
-        private static final int MAX_ITERATIONS = 5;
+        private static final String SYSTEM_PROMPT = """
+                You are an AI Agent.
+
+                You must always respond using JSON only.
+
+                Allowed responses:
+
+                MESSAGE:
+                {
+                        "type": "MESSAGE",
+                        "message": "your answer"
+                }
+
+                TOOL_CALL:
+                {
+                        "type": "TOOL_CALL",
+                        "toolCall": {
+                        "tool": "read_file",
+                        "arguments": {
+                                "path": "file path"
+                        }
+                        }
+                }
+
+                Rules:
+                - Never return normal text.
+                - Never use markdown.
+                - Never add explanations outside JSON.
+                - Use TOOL_CALL when you need a tool.
+                - Use MESSAGE when you can answer directly.
+
+
+                Available tools:
+
+                read_file:
+                Reads a text file from the workspace.
+
+                Arguments:
+                {
+                        "path": "string"
+                }
+                """;
 
         public String ask(String prompt) {
+                Conversation conversation = conversationManager.createConversation();
 
-                String currentPrompt = prompt;
+                AgentMessage systemMessage = new AgentMessage(MessageRoles.SYSTEM, SYSTEM_PROMPT);
+                conversationManager.addMessage(systemMessage, conversation);
 
+                AgentMessage userMessage = new AgentMessage(MessageRoles.USER , prompt);
+                conversationManager.addMessage(userMessage , conversation);
 
-                for (int i = 0; i < MAX_ITERATIONS; i++) {
-
-                        AgentResponse response = aiProvider.chat(currentPrompt);
-
-                        if (response.getType() == ResponseType.MESSAGE) {
-
-                                return response.getMessage();
-                        }
-
-                        if (response.getType() == ResponseType.TOOL_CALL) {
-
-
-                                String toolName = response
-                                        .getToolCall()
-                                        .getTool();
-
-
-                                Tool tool = toolRegistry.getToolByName(toolName);
-
-
-                                ToolRequest request = new ToolRequest(
-                                        response.getToolCall().getArguments()
-                                );
-
-
-                                ToolResult result = tool.execute(request);
-
-                                currentPrompt = """
-                                        A tool was executed.
-
-                                        Tool:
-                                        %s
-
-                                        Result:
-                                        %s
-
-                                        Continue and provide the final answer using JSON only.
-                                        """.formatted(
-                                                toolName,
-                                                result.toPromptText()
-                                        );
-                        }
-
-                }
+                agentReasoningEngine.run(conversation);
 
                 throw new RuntimeException(
                         "Agent reached maximum iterations"
