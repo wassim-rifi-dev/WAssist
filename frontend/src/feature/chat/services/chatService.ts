@@ -1,11 +1,11 @@
 import { api } from "../../../shared/services/api";
 
-export const ask = async (message: string) => {
+export const ask = async (prompt: string) => {
     try {
-        const response = await api.post("/chat/ask", { message });
+        const response = await api.post("/chat/ask", { prompt });
         return response.data;
     } catch (error) {
-        console.error("Error sending message:", error);
+        console.error("Error sending prompt:", error);
 
         throw error;
     }
