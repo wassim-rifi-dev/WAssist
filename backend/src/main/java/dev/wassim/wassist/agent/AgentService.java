@@ -8,6 +8,7 @@ import dev.wassim.wassist.agent.tools.ToolRequest;
 import dev.wassim.wassist.agent.tools.ToolResult;
 import dev.wassim.wassist.ai.provider.AIProvider;
 import dev.wassim.wassist.domain.dto.response.AgentResponse;
+import dev.wassim.wassist.domain.enums.ResponseType;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -16,13 +17,58 @@ public class AgentService {
         private final AIProvider aiProvider;
         private final ToolRegistry toolRegistry;
 
-        public ToolResult executeTool(String toolName, ToolRequest request) {
-                Tool tool = toolRegistry.getToolByName(toolName);
+        private static final int MAX_ITERATIONS = 5;
 
-                return tool.execute(request);
-        }
+        public String ask(String prompt) {
 
-        public AgentResponse ask(String prompt) {
-                return aiProvider.chat(prompt);
+                String currentPrompt = prompt;
+
+
+                for (int i = 0; i < MAX_ITERATIONS; i++) {
+
+                        AgentResponse response = aiProvider.chat(currentPrompt);
+
+                        if (response.getType() == ResponseType.MESSAGE) {
+
+                                return response.getMessage();
+                        }
+
+                        if (response.getType() == ResponseType.TOOL_CALL) {
+
+
+                                String toolName = response
+                                        .getToolCall()
+                                        .getTool();
+
+
+                                Tool tool = toolRegistry.getToolByName(toolName);
+
+
+                                ToolRequest request = new ToolRequest(
+                                        response.getToolCall().getArguments()
+                                );
+
+
+                                ToolResult result = tool.execute(request);
+
+                                currentPrompt = """
+                                        Previous tool call:
+                                        %s
+
+                                        Tool result:
+                                        %s
+
+                                        Continue and provide the final answer.
+                                        """.formatted(
+                                                toolName,
+                                                result.getContent()
+                                        );
+                        }
+
+                }
+
+                throw new RuntimeException(
+                        "Agent reached maximum iterations"
+                );
         }
 }
