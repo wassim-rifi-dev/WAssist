@@ -19,13 +19,14 @@ public class ToolResult {
     }
 
     public String toPromptText() {
-        if (success) {
-            return content;
-        }
-
         return """
-                Tool execution failed.
-                Reason: %s
-                """.formatted(errorMessage);
+                Success: %s
+
+                Result:
+                %s
+                """.formatted(
+                    success,
+                    content
+                );
     }
 }
