@@ -61,7 +61,7 @@ public class AgentService {
                                         Continue and provide the final answer.
                                         """.formatted(
                                                 toolName,
-                                                result.getContent()
+                                                result.toPromptText()
                                         );
                         }
 
