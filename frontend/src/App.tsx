@@ -1,9 +1,9 @@
-import SubmitButton from "./feature/chat/components/Prompt_Input/SubmitButton";
+import PromptInput from "./feature/chat/components/PromptInput";
 
 export default function App() {
   return (
-    <div>
-      <SubmitButton />
+    <div className="flex items-center justify-center w-full h-screen bg-[#10131A]">
+      <PromptInput />
     </div>
   )
 }
