@@ -14,6 +14,7 @@ export default function useSendPrompt() {
             setThinking(true);
 
             const res = await ask(message);
+            setPrompt("");
             return res.data;
         } catch (error) {
             setThinking(false);
