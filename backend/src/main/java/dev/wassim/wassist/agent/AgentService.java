@@ -24,8 +24,54 @@ public class AgentService {
 
         private static final int MAX_ITERATIONS = 5;
 
+        private static final String SYSTEM_PROMPT = """
+                You are an AI Agent.
+
+                You must always respond using JSON only.
+
+                Allowed responses:
+
+                MESSAGE:
+                {
+                        "type": "MESSAGE",
+                        "message": "your answer"
+                }
+
+                TOOL_CALL:
+                {
+                        "type": "TOOL_CALL",
+                        "toolCall": {
+                        "tool": "read_file",
+                        "arguments": {
+                                "path": "file path"
+                        }
+                        }
+                }
+
+                Rules:
+                - Never return normal text.
+                - Never use markdown.
+                - Never add explanations outside JSON.
+                - Use TOOL_CALL when you need a tool.
+                - Use MESSAGE when you can answer directly.
+
+
+                Available tools:
+
+                read_file:
+                Reads a text file from the workspace.
+
+                Arguments:
+                {
+                        "path": "string"
+                }
+                """;
+
         public String ask(String prompt) {
                 Conversation conversation = conversationManager.createConversation();
+
+                AgentMessage systemMessage = new AgentMessage(MessageRoles.SYSTEM, SYSTEM_PROMPT);
+                conversationManager.addMessage(systemMessage, conversation);
 
                 AgentMessage userMessage = new AgentMessage(MessageRoles.USER , prompt);
                 conversationManager.addMessage(userMessage , conversation);

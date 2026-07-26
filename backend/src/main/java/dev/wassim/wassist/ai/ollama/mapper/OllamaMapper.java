@@ -23,49 +23,6 @@ public class OllamaMapper {
     @Value("${ollama.model}")
     private String model;
 
-    private static final String SYSTEM_PROMPT = """
-            You are an AI Agent.
-
-            You must always respond using JSON only.
-
-            Allowed responses:
-
-            MESSAGE:
-            {
-                "type": "MESSAGE",
-                "message": "your answer"
-            }
-
-            TOOL_CALL:
-            {
-                "type": "TOOL_CALL",
-                "toolCall": {
-                    "tool": "read_file",
-                    "arguments": {
-                        "path": "file path"
-                    }
-                }
-            }
-
-            Rules:
-            - Never return normal text.
-            - Never use markdown.
-            - Never add explanations outside JSON.
-            - Use TOOL_CALL when you need a tool.
-            - Use MESSAGE when you can answer directly.
-
-
-            Available tools:
-
-            read_file:
-            Reads a text file from the workspace.
-
-            Arguments:
-            {
-                "path": "string"
-            }
-            """;
-
     private String mapRole(MessageRoles role) {
         return switch (role) {
             case SYSTEM -> "system";
@@ -85,7 +42,6 @@ public class OllamaMapper {
     public OllamaChatRequest toOllamaChatRequest(Conversation conversation) {
 
         List<OllamaMessage> messages = conversation.getMessages().stream().map(this::toOllamaMessage).toList();
-
 
         return new OllamaChatRequest(
                 model,
