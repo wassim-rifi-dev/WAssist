@@ -3,6 +3,7 @@ package dev.wassim.wassist.ai.ollama.provider;
 import org.springframework.stereotype.Component;
 
 import dev.wassim.wassist.ai.provider.AIProvider;
+import dev.wassim.wassist.domain.conversation.Conversation;
 import dev.wassim.wassist.domain.dto.response.AgentResponse;
 import dev.wassim.wassist.ai.ollama.client.OllamaClient;
 import dev.wassim.wassist.ai.ollama.dto.request.OllamaChatRequest;
@@ -17,8 +18,8 @@ public class OllamaProvider implements AIProvider {
         private final OllamaMapper ollamaMapper;
 
         @Override
-        public AgentResponse chat(String prompt) {
-                OllamaChatRequest request = ollamaMapper.toOllamaChatRequest(prompt);
+        public AgentResponse chat(Conversation conversation) {
+                OllamaChatRequest request = ollamaMapper.toOllamaChatRequest(conversation);
 
                 OllamaChatResponse response = ollamaClient.chat(request);
 

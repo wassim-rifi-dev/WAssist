@@ -14,7 +14,7 @@ public class ConversationManager {
         return conversation;
     }
 
-    public void addMessage(AgentMessage message) {
+    public void addMessage(AgentMessage message , Conversation conversation) {
         conversation.getMessages().add(message);
     }
 }

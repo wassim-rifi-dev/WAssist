@@ -7,7 +7,10 @@ import org.springframework.stereotype.Component;
 
 import dev.wassim.wassist.ai.ollama.dto.OllamaMessage;
 import dev.wassim.wassist.ai.ollama.dto.request.OllamaChatRequest;
+import dev.wassim.wassist.domain.conversation.Conversation;
+import dev.wassim.wassist.domain.dto.AgentMessage;
 import dev.wassim.wassist.domain.dto.response.AgentResponse;
+import dev.wassim.wassist.domain.enums.MessageRoles;
 import lombok.RequiredArgsConstructor;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -63,32 +66,30 @@ public class OllamaMapper {
             }
             """;
 
-    public OllamaMessage toSystemMessage() {
+    private String mapRole(MessageRoles role) {
+        return switch (role) {
+            case SYSTEM -> "system";
+            case USER -> "user";
+            case ASSISTANT -> "assistant";
+            case TOOL -> "tool";
+        };
+    }
+
+    public OllamaMessage toOllamaMessage(AgentMessage message) {
         return new OllamaMessage(
-                "system",
-                SYSTEM_PROMPT
+            mapRole(message.getRole()),
+            message.getContent()
         );
     }
 
-    public OllamaMessage toOllamaMessage(String prompt) {
-        return new OllamaMessage(
-            "user",
-            prompt
-        );
-    }
+    public OllamaChatRequest toOllamaChatRequest(Conversation conversation) {
 
-    public OllamaChatRequest toOllamaChatRequest(String prompt) {
-        OllamaMessage systemMessage = toSystemMessage();
-
-        OllamaMessage userMessage = toOllamaMessage(prompt);
+        List<OllamaMessage> messages = conversation.getMessages().stream().map(this::toOllamaMessage).toList();
 
 
         return new OllamaChatRequest(
                 model,
-                List.of(
-                    systemMessage,
-                    userMessage
-                ),
+                messages,
                 false
         );
     }
