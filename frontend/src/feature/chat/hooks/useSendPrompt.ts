@@ -4,6 +4,7 @@ import { ask } from "../services/chatService";
 export default function useSendPrompt() {
     const [prompt , setPrompt] = useState<string>("");
     const [thinking , setThinking] = useState<boolean>(false);
+    const [response, setResponse] = useState<string>("");
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         setPrompt(e.target.value);
@@ -15,6 +16,7 @@ export default function useSendPrompt() {
 
             const res = await ask(message);
             setPrompt("");
+            setResponse(res.data)
             return res.data;
         } catch (error) {
             setThinking(false);
@@ -40,6 +42,7 @@ export default function useSendPrompt() {
     return {
         prompt,
         thinking,
+        response,
         handleChange,
         handleSubmit
     }
