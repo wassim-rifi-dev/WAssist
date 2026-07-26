@@ -20,6 +20,56 @@ public class OllamaMapper {
     @Value("${ollama.model}")
     private String model;
 
+    private static final String SYSTEM_PROMPT = """
+            You are an AI Agent.
+
+            You must always respond using JSON only.
+
+            Allowed responses:
+
+            MESSAGE:
+            {
+                "type": "MESSAGE",
+                "message": "your answer"
+            }
+
+            TOOL_CALL:
+            {
+                "type": "TOOL_CALL",
+                "toolCall": {
+                    "tool": "read_file",
+                    "arguments": {
+                        "path": "file path"
+                    }
+                }
+            }
+
+            Rules:
+            - Never return normal text.
+            - Never use markdown.
+            - Never add explanations outside JSON.
+            - Use TOOL_CALL when you need a tool.
+            - Use MESSAGE when you can answer directly.
+
+
+            Available tools:
+
+            read_file:
+            Reads a text file from the workspace.
+
+            Arguments:
+            {
+                "path": "string"
+            }
+            """;
+
+    public OllamaMessage toSystemMessage() {
+        return new OllamaMessage(
+                "system",
+                SYSTEM_PROMPT
+        );
+    }
+
     public OllamaMessage toOllamaMessage(String prompt) {
         return new OllamaMessage(
             "user",
@@ -27,11 +77,20 @@ public class OllamaMapper {
         );
     }
 
-    public OllamaChatRequest toOllamaChatRequest(OllamaMessage message) {
+    public OllamaChatRequest toOllamaChatRequest(String prompt) {
+        OllamaMessage systemMessage = toSystemMessage();
+
+        OllamaMessage userMessage = toOllamaMessage(prompt);
+
+
         return new OllamaChatRequest(
-            model, 
-            List.of(message), 
-            false);
+                model,
+                List.of(
+                    systemMessage,
+                    userMessage
+                ),
+                false
+        );
     }
 
     public AgentResponse toAgentResponse(String content) {
@@ -42,7 +101,11 @@ public class OllamaMapper {
         }
 
         try {
-            return objectMapper.readValue(content, AgentResponse.class);
+            return objectMapper.readValue(
+                    content,
+                    AgentResponse.class
+            );
+
         } catch (JacksonException exception) {
             throw new IllegalStateException(
                 "Ollama returned invalid JSON for AgentResponse",

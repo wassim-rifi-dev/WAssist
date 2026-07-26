@@ -52,16 +52,18 @@ public class AgentService {
                                 ToolResult result = tool.execute(request);
 
                                 currentPrompt = """
-                                        Previous tool call:
+                                        A tool was executed.
+
+                                        Tool:
                                         %s
 
-                                        Tool result:
+                                        Result:
                                         %s
 
-                                        Continue and provide the final answer.
+                                        Continue and provide the final answer using JSON only.
                                         """.formatted(
                                                 toolName,
-                                                result.getContent()
+                                                result.toPromptText()
                                         );
                         }
 
