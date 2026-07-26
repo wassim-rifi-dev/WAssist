@@ -1,18 +1,16 @@
 package dev.wassim.wassist.agent;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
-import dev.wassim.wassist.agent.tools.Tool;
-import dev.wassim.wassist.agent.tools.ToolRegistry;
-import dev.wassim.wassist.agent.tools.ToolRequest;
+import dev.wassim.wassist.agent.tools.ToolExecutor;
 import dev.wassim.wassist.agent.tools.ToolResult;
 import dev.wassim.wassist.ai.provider.AIProvider;
 import dev.wassim.wassist.common.exceptions.AgentExecutionException;
 import dev.wassim.wassist.domain.conversation.Conversation;
 import dev.wassim.wassist.domain.conversation.ConversationManager;
-import dev.wassim.wassist.domain.dto.AgentMessage;
 import dev.wassim.wassist.domain.dto.response.AgentResponse;
-import dev.wassim.wassist.domain.enums.MessageRoles;
 import dev.wassim.wassist.domain.enums.ResponseType;
 import lombok.RequiredArgsConstructor;
 
@@ -20,46 +18,39 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AgentReasoningEngine {
     private final AIProvider aiProvider;
-    private final ToolRegistry toolRegistry;
+    private final ToolExecutor toolExecutor;
     private final ConversationManager conversationManager;
-    
+
     private static final int MAX_ITERATIONS = 5;
 
     public String run(Conversation conversation) {
         for (int i = 0; i < MAX_ITERATIONS; i++) {
-
             AgentResponse response = aiProvider.chat(conversation);
 
-            if (response.getType() == ResponseType.MESSAGE) {
-                    AgentMessage assistantMessage = new AgentMessage(MessageRoles.ASSISTANT , response.getMessage());
-                    conversationManager.addMessage(assistantMessage , conversation);
+            switch (response.getType()) {
 
+                case ResponseType.MESSAGE:
+                    conversationManager.addAssistantMessage(response.getMessage(), conversation);
                     return response.getMessage();
-            }
 
-            if (response.getType() == ResponseType.TOOL_CALL) {
-                    AgentMessage assistantMessage = new AgentMessage(MessageRoles.ASSISTANT , "Calling tool: " + response.getToolCall().getTool());
-                    conversationManager.addMessage(assistantMessage , conversation);
+                case ResponseType.TOOL_CALL:
+                    conversationManager.addAssistantMessage("Calling tool: " + response.getToolCall().getTool(), conversation);
 
                     String toolName = response
-                            .getToolCall()
-                            .getTool();
+                        .getToolCall()
+                        .getTool();
 
-                    Tool tool = toolRegistry.getToolByName(toolName);
+                    Map<String , Object> argument = response.getToolCall().getArguments();
 
+                    ToolResult result = toolExecutor.execute(toolName , argument);
 
-                    ToolRequest request = new ToolRequest(
-                            response.getToolCall().getArguments()
-                    );
+                    conversationManager.addToolMessage(result.toPromptText(), conversation);
 
-
-                    ToolResult result = tool.execute(request);
-
-                    AgentMessage toolMessage = new AgentMessage(MessageRoles.TOOL, result.toPromptText());
-                    conversationManager.addMessage(toolMessage , conversation);
+                default:
+                    break;
             }
-
         }
+
         throw new AgentExecutionException(
             "Agent reached maximum iterations"
         );

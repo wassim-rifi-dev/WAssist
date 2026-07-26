@@ -12,6 +12,11 @@ import dev.wassim.wassist.common.exceptions.ToolNotFound;
 public class ToolRegistry {
     private final Map<String, Tool> tools;
 
+    private String formatAvailableTool(Tool tool) {
+        return tool.getName() + ":\n"
+                + tool.getDescription() + ".\n\n";
+    }
+
     public ToolRegistry(List<Tool> t) {
         this.tools = t.stream().collect(Collectors.toMap(Tool::getName, tool -> tool));
     }
@@ -24,6 +29,12 @@ public class ToolRegistry {
         }
 
         return tool;
+    }
+
+    public String formatAllTools() {
+        List<Tool> tools = getAllTools();
+
+        return String.join("", tools.stream().map(this::formatAvailableTool).toList());
     }
 
     public List<Tool> getAllTools() {
