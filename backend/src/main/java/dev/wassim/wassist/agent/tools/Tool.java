@@ -5,5 +5,5 @@ public interface Tool {
 
     String getDescription();
 
-    ToolRequest execute(ToolRequest request);
+    ToolResult execute(ToolRequest request);
 }
