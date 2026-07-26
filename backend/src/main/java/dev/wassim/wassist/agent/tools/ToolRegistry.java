@@ -1,4 +1,4 @@
-package dev.wassim.wassist.tools;
+package dev.wassim.wassist.agent.tools;
 
 import java.util.List;
 import java.util.Map;

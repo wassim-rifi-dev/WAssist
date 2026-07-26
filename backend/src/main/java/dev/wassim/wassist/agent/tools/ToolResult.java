@@ -1,4 +1,4 @@
-package dev.wassim.wassist.tools;
+package dev.wassim.wassist.agent.tools;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
