@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const DEFAULT_LOCAL_API_URL: string = "http://localhost:8000/api";
+const DEFAULT_LOCAL_API_URL: string = "http://localhost:8080/api";
 
 export const api = axios.create({
     baseURL: DEFAULT_LOCAL_API_URL,
