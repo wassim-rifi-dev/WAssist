@@ -1,5 +1,7 @@
 package dev.wassim.wassist.workspace;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -25,7 +27,21 @@ public class WorkspaceService {
         return target;
     }
 
-    public boolean existe(Path file) {
+    public boolean exists(Path file) {
         return Files.exists(file);
+    }
+
+    public String readFile(String relativePath) {
+        try {
+            Path file = resolve(relativePath);
+
+            if (!exists(file)) {
+                throw new FileNotFoundException("File not found");
+            }
+
+            return Files.readString(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot read file", e);
+        }
     }
 }
