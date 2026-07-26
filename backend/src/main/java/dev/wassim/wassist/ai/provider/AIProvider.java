@@ -1,5 +1,7 @@
 package dev.wassim.wassist.ai.provider;
 
+import dev.wassim.wassist.domain.dto.response.AgentResponse;
+
 public interface AIProvider {
-    String chat(String prompt);
+    AgentResponse chat(String prompt);
 }
