@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import org.springframework.stereotype.Service;
 
 import dev.wassim.wassist.common.exceptions.NotAFileException;
+import dev.wassim.wassist.common.exceptions.PathOutsideWorkspaceException;
 import dev.wassim.wassist.config.WorkspaceConfig;
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +29,7 @@ public class WorkspaceService {
         Path target = workspace.resolve(relativePath).normalize();
 
         if (!target.startsWith(workspace)) {
-            throw new SecurityException("Access denied");
+            throw new PathOutsideWorkspaceException("Access denied");
         }
 
         return target;
