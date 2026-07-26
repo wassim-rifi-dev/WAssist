@@ -1,14 +1,20 @@
 package dev.wassim.wassist.agent.tools.files_tool;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.IOException;
+
+import org.springframework.stereotype.Component;
 
 import dev.wassim.wassist.agent.tools.Tool;
 import dev.wassim.wassist.agent.tools.ToolRequest;
 import dev.wassim.wassist.agent.tools.ToolResult;
+import dev.wassim.wassist.agent.workspace.WorkspaceService;
+import lombok.AllArgsConstructor;
 
+@Component
+@AllArgsConstructor
 public class ReadFileTool implements Tool {
-    
+    private final WorkspaceService workspaceService;
+
     @Override
     public String getName() {
         return "read_file";
@@ -23,16 +29,12 @@ public class ReadFileTool implements Tool {
     public ToolResult execute(ToolRequest request) {
         try {
             String rawPath = request.getStringArg("path");
-            Path path = Path.of(rawPath).normalize();
-
-            if (Files.notExists(path)) {
-                return ToolResult.failure("File not found: " + rawPath);
-            }
-
-            String content = Files.readString(path);
+            String content = workspaceService.readFile(rawPath);
             return ToolResult.success(content);
-        } catch (Exception e) {
+        } catch (IOException e) {
             return ToolResult.failure("Failed to read file: " + e.getMessage());
+        } catch (Exception e) {
+            return ToolResult.failure("Unexpected error: " + e.getMessage());
         }
     }
 }
