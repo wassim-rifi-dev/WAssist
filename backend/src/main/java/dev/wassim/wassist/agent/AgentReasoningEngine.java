@@ -25,7 +25,6 @@ public class AgentReasoningEngine {
 
     public String run(Conversation conversation) {
         for (int i = 0; i < MAX_ITERATIONS; i++) {
-
             AgentResponse response = aiProvider.chat(conversation);
 
             switch (response.getType()) {
