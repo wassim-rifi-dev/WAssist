@@ -1,5 +1,6 @@
 package dev.wassim.wassist.workspace;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.springframework.stereotype.Service;
@@ -22,5 +23,9 @@ public class WorkspaceService {
         }
 
         return target;
+    }
+
+    public boolean existe(Path file) {
+        return Files.exists(file);
     }
 }
