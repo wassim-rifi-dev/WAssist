@@ -2,10 +2,9 @@ package dev.wassim.wassist.agent;
 
 import org.springframework.stereotype.Service;
 
+import dev.wassim.wassist.common.exceptions.AgentExecutionException;
 import dev.wassim.wassist.domain.conversation.Conversation;
 import dev.wassim.wassist.domain.conversation.ConversationManager;
-import dev.wassim.wassist.domain.dto.AgentMessage;
-import dev.wassim.wassist.domain.enums.MessageRoles;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -60,15 +59,13 @@ public class AgentService {
         public String ask(String prompt) {
                 Conversation conversation = conversationManager.createConversation();
 
-                AgentMessage systemMessage = new AgentMessage(MessageRoles.SYSTEM, SYSTEM_PROMPT);
-                conversationManager.addMessage(systemMessage, conversation);
+                conversationManager.addSystemeMessage(SYSTEM_PROMPT, conversation);
 
-                AgentMessage userMessage = new AgentMessage(MessageRoles.USER , prompt);
-                conversationManager.addMessage(userMessage , conversation);
+                conversationManager.addUserMessage(prompt, conversation);
 
                 agentReasoningEngine.run(conversation);
 
-                throw new RuntimeException(
+                throw new AgentExecutionException(
                         "Agent reached maximum iterations"
                 );
         }

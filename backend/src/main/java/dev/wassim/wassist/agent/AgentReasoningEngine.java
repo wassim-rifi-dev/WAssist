@@ -10,9 +10,7 @@ import dev.wassim.wassist.ai.provider.AIProvider;
 import dev.wassim.wassist.common.exceptions.AgentExecutionException;
 import dev.wassim.wassist.domain.conversation.Conversation;
 import dev.wassim.wassist.domain.conversation.ConversationManager;
-import dev.wassim.wassist.domain.dto.AgentMessage;
 import dev.wassim.wassist.domain.dto.response.AgentResponse;
-import dev.wassim.wassist.domain.enums.MessageRoles;
 import dev.wassim.wassist.domain.enums.ResponseType;
 import lombok.RequiredArgsConstructor;
 
@@ -31,15 +29,13 @@ public class AgentReasoningEngine {
             AgentResponse response = aiProvider.chat(conversation);
 
             if (response.getType() == ResponseType.MESSAGE) {
-                    AgentMessage assistantMessage = new AgentMessage(MessageRoles.ASSISTANT , response.getMessage());
-                    conversationManager.addMessage(assistantMessage , conversation);
+                    conversationManager.addAssistantMessage(response.getMessage(), conversation);
 
                     return response.getMessage();
             }
 
             if (response.getType() == ResponseType.TOOL_CALL) {
-                    AgentMessage assistantMessage = new AgentMessage(MessageRoles.ASSISTANT , "Calling tool: " + response.getToolCall().getTool());
-                    conversationManager.addMessage(assistantMessage , conversation);
+                    conversationManager.addAssistantMessage("Calling tool: " + response.getToolCall().getTool(), conversation);
 
                     String toolName = response
                             .getToolCall()
@@ -55,8 +51,7 @@ public class AgentReasoningEngine {
 
                     ToolResult result = tool.execute(request);
 
-                    AgentMessage toolMessage = new AgentMessage(MessageRoles.TOOL, result.toPromptText());
-                    conversationManager.addMessage(toolMessage , conversation);
+                    conversationManager.addToolMessage(result.toPromptText(), conversation);
             }
 
         }
