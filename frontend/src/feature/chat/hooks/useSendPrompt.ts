@@ -5,6 +5,8 @@ export default function useSendPrompt() {
     const [prompt , setPrompt] = useState<string>("");
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+        console.log(e.target.value);
+        
         setPrompt(e.target.value);
     };
 
