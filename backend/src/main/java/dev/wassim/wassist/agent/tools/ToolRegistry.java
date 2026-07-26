@@ -4,27 +4,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
+import dev.wassim.wassist.common.exceptions.ToolNotFound;
+
+@Component
 public class ToolRegistry {
-    private final Map<String, Tool> toolsByName;
+    private final Map<String, Tool> tools;
 
-    public ToolRegistry(List<Tool> tools) {
-        this.toolsByName = tools.stream().collect(Collectors.toMap(Tool::getName, t -> t));
+    public ToolRegistry(List<Tool> t) {
+        this.tools = t.stream().collect(Collectors.toMap(Tool::getName, tool -> tool));
     }
 
-    public Tool getTool(String name) {
-        Tool tool = toolsByName.get(name);
+    public Tool getToolByName(String name) {
+        Tool tool = tools.get(name);
 
         if (tool == null) {
-            throw new IllegalArgumentException("Unknown tool: " + name);
+            throw new ToolNotFound("Unknown tool: " + name);
         }
-        
+
         return tool;
     }
 
     public List<Tool> getAllTools() {
-        return List.copyOf(toolsByName.values());
+        return List.copyOf(tools.values());
     }
 }
