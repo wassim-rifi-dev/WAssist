@@ -35,7 +35,9 @@ public class OllamaMapper {
     public OllamaMessage toOllamaMessage(AgentMessage message) {
         return new OllamaMessage(
             mapRole(message.getRole()),
-            message.getContent()
+            message.getContent(),
+            message.getToolCall(),
+            message.getToolName()
         );
     }
 
