@@ -4,48 +4,64 @@ import org.springframework.stereotype.Component;
 
 import dev.wassim.wassist.domain.dto.AgentMessage;
 import dev.wassim.wassist.domain.enums.MessageRoles;
+import dev.wassim.wassist.domain.toolcall.ToolCall;
 
 @Component
 public class ConversationManager {
-    private Conversation conversation;
-
     public Conversation createConversation() {
-        Conversation conversation = new Conversation();
-        return conversation;
+        return new Conversation();
     }
 
-    public Conversation getCurrentConversation() {
-        return conversation;
-    }
-
-    public void addSystemeMessage(String content , Conversation conversation) {
+    public void addSystemMessage(String content, Conversation conversation) {
         AgentMessage message = new AgentMessage(
-            MessageRoles.SYSTEM,
-            content
+                MessageRoles.SYSTEM,
+                content,
+                null,
+                null
         );
 
         conversation.getMessages().add(message);
     }
-    public void addUserMessage(String content , Conversation conversation) {
+
+    public void addUserMessage(String content, Conversation conversation) {
         AgentMessage message = new AgentMessage(
-            MessageRoles.USER,
-            content
+                MessageRoles.USER,
+                content,
+                null,
+                null
         );
 
         conversation.getMessages().add(message);
     }
-    public void addAssistantMessage(String content , Conversation conversation) {
+
+    public void addAssistantMessage(String content, Conversation conversation) {
         AgentMessage message = new AgentMessage(
-            MessageRoles.ASSISTANT,
-            content
+                MessageRoles.ASSISTANT,
+                content,
+                null,
+                null
         );
 
         conversation.getMessages().add(message);
     }
-    public void addToolMessage(String content , Conversation conversation) {
+
+    public void addAssistantToolCall(ToolCall toolCall, Conversation conversation) {
         AgentMessage message = new AgentMessage(
-            MessageRoles.TOOL,
-            content
+                MessageRoles.ASSISTANT,
+                null,
+                toolCall,
+                null
+        );
+
+        conversation.getMessages().add(message);
+    }
+
+    public void addToolMessage(String toolName, String content, Conversation conversation) {
+        AgentMessage message = new AgentMessage(
+                MessageRoles.TOOL,
+                content,
+                null,
+                toolName
         );
 
         conversation.getMessages().add(message);

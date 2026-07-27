@@ -34,7 +34,7 @@ public class AgentReasoningEngine {
                     return response.getMessage();
 
                 case ResponseType.TOOL_CALL:
-                    conversationManager.addAssistantMessage("Calling tool: " + response.getToolCall().getTool(), conversation);
+                    conversationManager.addAssistantToolCall(response.getToolCall() , conversation);
 
                     String toolName = response
                         .getToolCall()
@@ -44,7 +44,7 @@ public class AgentReasoningEngine {
 
                     ToolResult result = toolExecutor.execute(toolName , argument);
 
-                    conversationManager.addToolMessage(result.toPromptText(), conversation);
+                    conversationManager.addToolMessage(toolName , result.toPromptText(), conversation);
 
                 default:
                     break;

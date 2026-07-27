@@ -19,14 +19,20 @@ public class ToolResult {
     }
 
     public String toPromptText() {
-        return """
-                Success: %s
+        if (success) {
+            return """
+                    Success: true
 
-                Result:
+                    Content:
+                    %s
+                    """.formatted(content);
+        }
+
+        return """
+                Success: false
+
+                Error:
                 %s
-                """.formatted(
-                    success,
-                    content
-                );
+                """.formatted(errorMessage);
     }
 }
