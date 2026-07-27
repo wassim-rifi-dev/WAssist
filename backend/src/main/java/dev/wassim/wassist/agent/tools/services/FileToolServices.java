@@ -1,4 +1,4 @@
-package dev.wassim.wassist.agent.workspace;
+package dev.wassim.wassist.agent.tools.services;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class WorkspaceService {
+public class FileToolServices {
     private final WorkspaceConfig workspaceConfig;
 
     public Path getWorkspace() {
