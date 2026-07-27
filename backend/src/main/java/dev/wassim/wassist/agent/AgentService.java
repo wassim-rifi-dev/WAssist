@@ -17,7 +17,7 @@ public class AgentService {
         public String ask(String prompt) {
                 Conversation conversation = conversationManager.createConversation();
 
-                conversationManager.addSystemeMessage(promptBuilder.buildSystemPrompt(), conversation);
+                conversationManager.addSystemMessage(promptBuilder.buildSystemPrompt(), conversation);
 
                 conversationManager.addUserMessage(prompt, conversation);
 
