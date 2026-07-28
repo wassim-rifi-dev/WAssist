@@ -9,3 +9,11 @@ ollama:
 agent:
   workspace:
     path: C:\Dev
+
+    ignored-directories:
+      - .git
+      - node_modules
+      - target
+      - build
+      - .idea
+      - .gradle
