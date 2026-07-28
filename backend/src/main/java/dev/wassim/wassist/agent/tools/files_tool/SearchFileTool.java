@@ -26,7 +26,7 @@ public class SearchFileTool implements Tool {
     @Override
     public ToolResult execute(ToolRequest request) {
         try {
-            String target = request.getStringArg("target");
+            String target = request.getStringArg("query");
 
             return fileToolServices.searchFile(target);
         } catch (Exception e) {
