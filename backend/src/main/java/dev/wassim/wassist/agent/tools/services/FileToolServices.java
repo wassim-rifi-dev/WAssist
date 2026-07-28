@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class FileToolServices {
     private final WorkspaceConfig workspaceConfig;
 
-    private String serachFileResponse(List<Path> results) {
+    private String searchFileResponse(List<Path> results) {
         return """
                 Found %d match(es):
 
@@ -32,6 +32,25 @@ public class FileToolServices {
                             .map(Path::toString)
                             .collect(Collectors.joining("\n"))
                 );
+    }
+
+    private String listDirectoryResponse(Path directory, List<Path> results) {
+        String items = results.stream()
+                .map(path -> "- %s (%s)".formatted(
+                        path.getFileName(),
+                        Files.isDirectory(path) ? "Directory" : "File"))
+                .collect(Collectors.joining("\n"));
+
+        return """
+                Directory:
+                %s
+
+                Items:
+                %s
+                """.formatted(
+                directory,
+                items
+        );
     }
 
     public Path getWorkspace() {
@@ -90,11 +109,37 @@ public class FileToolServices {
                 return ToolResult.failure("No file or folder found with this name.");
             }
 
-            String response = serachFileResponse(results);
+            String response = searchFileResponse(results);
 
             return ToolResult.success(response);
         } catch (IOException e) {
             return ToolResult.failure("Error while searching files: " + e.getMessage());
+        }
+    }
+
+    public ToolResult listDirectory(String relativePath) throws IOException {
+        Path path = resolve(relativePath);
+
+        if (!exists(path)) {
+            throw new FileNotFoundException("File does not exist: " + path);
+        }
+
+        if (isFile(path)) {
+            throw new NotAFileException("Path is not a directory: " + path);
+        }
+
+        try (Stream<Path> directories = Files.list(path)) {
+            List<Path> results = directories
+                                    .filter(directory -> !isEgnored(directory))
+                                    .collect(Collectors.toList());
+
+            if (results.isEmpty()) {
+                return ToolResult.failure("No file or folder found in this folder");
+            }
+
+            String response = listDirectoryResponse(path, results);
+
+            return ToolResult.success(response);
         }
     }
 }
