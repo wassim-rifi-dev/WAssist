@@ -30,6 +30,7 @@ public class ReadFileTool implements Tool {
         try {
             String rawPath = request.getStringArg("path");
             String content = fileToolServices.readFile(rawPath);
+
             return ToolResult.success(content);
         } catch (IOException e) {
             return ToolResult.failure("Failed to read file: " + e.getMessage());

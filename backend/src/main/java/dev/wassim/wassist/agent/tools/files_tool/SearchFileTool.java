@@ -35,30 +35,8 @@ public class SearchFileTool implements Tool {
     public ToolResult execute(ToolRequest request) {
         try {
             String target = request.getStringArg("target");
-            Path workspace = fileToolServices.getWorkspace();
 
-            try (Stream<Path> paths = Files.walk(workspace)) {
-                List<Path> results = paths.filter(path -> path.getFileName().toString().equalsIgnoreCase(target)).collect(Collectors.toList());
-
-                if (results.isEmpty()) {
-                    return ToolResult.failure("No file or folder found with this name.");
-                }
-
-                String response = """
-                    Found %d match(es):
-
-                    %s
-                    """.formatted(
-                        results.size(),
-                        results.stream()
-                                .map(Path::toString)
-                                .collect(Collectors.joining("\n"))
-                    );
-
-                return ToolResult.success(response);
-            } catch (IOException e) {
-                return ToolResult.failure("Error while searching files: " + e.getMessage());
-            }
+            return fileToolServices.searchFile(target);
         } catch (Exception e) {
             return ToolResult.failure("Unexpected error: " + e.getMessage());
         }
