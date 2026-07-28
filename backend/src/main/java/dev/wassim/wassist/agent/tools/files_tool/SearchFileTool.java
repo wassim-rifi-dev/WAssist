@@ -1,6 +1,12 @@
 package dev.wassim.wassist.agent.tools.files_tool;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
 
@@ -12,28 +18,25 @@ import lombok.AllArgsConstructor;
 
 @Component
 @AllArgsConstructor
-public class ReadFileTool implements Tool {
+public class SearchFileTool implements Tool {
     private final FileToolServices fileToolServices;
 
     @Override
     public String getName() {
-        return "read_file";
+        return "search_file";
     }
 
     @Override
     public String getDescription() {
-        return "Reads the contents of a file from the current workspace. Use this tool only when you already know the file's path and need to examine or understand its contents. This tool does not search for files or directories; use SearchFileTool first if the file location is unknown.";
+        return "Searches the current workspace recursively for files or directories whose names match the requested query. Use this tool when you know the name (or part of the name) of a file, folder, or project but do not know its location. The tool returns the matching paths only; it does not read or analyze file contents.";
     }
 
     @Override
     public ToolResult execute(ToolRequest request) {
         try {
-            String rawPath = request.getStringArg("path");
-            String content = fileToolServices.readFile(rawPath);
+            String target = request.getStringArg("target");
 
-            return ToolResult.success(content);
-        } catch (IOException e) {
-            return ToolResult.failure("Failed to read file: " + e.getMessage());
+            return fileToolServices.searchFile(target);
         } catch (Exception e) {
             return ToolResult.failure("Unexpected error: " + e.getMessage());
         }
