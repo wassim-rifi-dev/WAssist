@@ -78,11 +78,12 @@ public class FileToolServices {
         return Files.readString(path);
     }
 
-    public ToolResult searchFile(String target) {
+    public ToolResult searchFile(String query) {
         try (Stream<Path> paths = Files.walk(getWorkspace())) {
             List<Path> results = paths
                                 .filter(path -> !isEgnored(path))
-                                .filter(path -> path.getFileName().toString().equalsIgnoreCase(target))
+                                .filter(path -> path.getFileName().toString().equalsIgnoreCase(query))
+                                .map(path -> getWorkspace().relativize(path))
                                 .collect(Collectors.toList());
 
             if (results.isEmpty()) {
