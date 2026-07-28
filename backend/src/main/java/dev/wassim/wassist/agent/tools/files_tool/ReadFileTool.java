@@ -22,7 +22,7 @@ public class ReadFileTool implements Tool {
 
     @Override
     public String getDescription() {
-        return "Reads the text content of a file from the local filesystem given its path.";
+        return "Reads the contents of a file from the current workspace. Use this tool only when you already know the file's path and need to examine or understand its contents. This tool does not search for files or directories; use SearchFileTool first if the file location is unknown.";
     }
 
     @Override
