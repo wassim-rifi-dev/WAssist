@@ -1,13 +1,5 @@
 package dev.wassim.wassist.agent.tools.files_tool;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.springframework.stereotype.Component;
 
 import dev.wassim.wassist.agent.tools.Tool;
