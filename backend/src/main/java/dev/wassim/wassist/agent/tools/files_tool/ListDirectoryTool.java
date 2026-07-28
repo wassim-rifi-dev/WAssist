@@ -24,5 +24,13 @@ public class ListDirectoryTool implements Tool {
     }
 
     @Override
-    public ToolResult execute(ToolRequest request) {}
+    public ToolResult execute(ToolRequest request) {
+        try {
+            String target = request.getStringArg("path");
+
+            return fileToolServices.listDirectory(target);
+        } catch (Exception e) {
+            return ToolResult.failure("Unexpected error: " + e.getMessage());
+        }
+    }
 }
