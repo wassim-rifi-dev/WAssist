@@ -1,6 +1,5 @@
 package dev.wassim.wassist.agent.tools.services;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -25,145 +24,143 @@ import lombok.RequiredArgsConstructor;
 public class FileToolServices {
     private final WorkspaceConfig workspaceConfig;
 
-    private String searchFileResponse(List<Path> results) {
-        return """
-                Found %d match(es):
-
-                %s
-                """.formatted(
-                    results.size(),
-                    results.stream()
-                            .map(Path::toString)
-                            .collect(Collectors.joining("\n"))
-                );
+    private Path getWorkspace() throws IOException {
+        return workspaceConfig.getPath()
+                .toAbsolutePath()
+                .toRealPath();
     }
 
-    private String listDirectoryResponse(Path directory, List<Path> results) {
-        String items = results.stream()
-                .map(path -> "- %s (%s)".formatted(
-                        path.getFileName(),
-                        Files.isDirectory(path) ? "Directory" : "File"))
-                .collect(Collectors.joining("\n"));
-
-        return """
-                Directory:
-                %s
-
-                Items:
-                %s
-                """.formatted(
-                directory,
-                items
-        );
+    private Path resolve(String relativePath) throws IOException {
+        return getWorkspace()
+                .resolve(relativePath)
+                .normalize();
     }
 
-    public Path getWorkspace() {
-        Path workspace = workspaceConfig.getPath().toAbsolutePath().normalize();
-
-        return workspace;
-    }
-
-    private Path resolve(String relativePath) {
+    private Path validateExistingPath(String relativePath) throws IOException {
         Path workspace = getWorkspace();
 
-        Path target = workspace.resolve(relativePath).normalize();
+        Path target = resolve(relativePath);
 
-        if (!target.startsWith(workspace)) {
-            throw new PathOutsideWorkspaceException("Access denied");
+        Path realTarget = target.toRealPath();
+
+        if (!realTarget.startsWith(workspace)) {
+            throw new PathOutsideWorkspaceException("Access denied.");
         }
 
-        return target;
-    }
-
-    private boolean exists(Path path) {
-        return Files.exists(path);
-    }
-
-    private boolean isFile(Path path) {
-        return Files.isRegularFile(path);
+        return realTarget;
     }
 
     private boolean isIgnored(Path path) {
-        return workspaceConfig.getIgnoredDirectories().contains(path.getFileName().toString());
+        return workspaceConfig.getIgnoredDirectories()
+                .stream()
+                .anyMatch(name -> name.equalsIgnoreCase(path.getFileName().toString()));
     }
 
     public String readFile(String relativePath) throws IOException {
-        Path path = resolve(relativePath);
+        Path file = validateExistingPath(relativePath);
 
-        if (!exists(path)) {
-            throw new FileNotFoundException("File does not exist: " + path);
+        if (!Files.isRegularFile(file)) {
+            throw new NotAFileException("Path is not a file: " + relativePath);
         }
 
-        if (!isFile(path)) {
-            throw new NotAFileException("Path is not a file (it's a directory): " + path);
-        }
-
-        return Files.readString(path);
+        return Files.readString(file);
     }
 
     public ToolResult searchFile(String query) {
-        Path workspace = getWorkspace();
         List<Path> results = new ArrayList<>();
 
         try {
+            Path workspace = getWorkspace();
+
             Files.walkFileTree(workspace, new SimpleFileVisitor<>() {
                 @Override
-                public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attributes) {
-                    if (!directory.equals(workspace) && isIgnored(directory)) {
+                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                    if (!dir.equals(workspace) && isIgnored(dir)) {
                         return FileVisitResult.SKIP_SUBTREE;
                     }
 
-                    if (!directory.equals(workspace)
-                            && directory.getFileName().toString().equalsIgnoreCase(query)) {
-                        results.add(workspace.relativize(directory));
+                    String name = dir.getFileName().toString().toLowerCase();
+
+                    if (name.contains(query.toLowerCase())) {
+                        results.add(workspace.relativize(dir));
                     }
 
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
-                    if (file.getFileName().toString().contains(query)) {
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    String name = file.getFileName().toString().toLowerCase();
+
+                    if (name.contains(query.toLowerCase())) {
                         results.add(workspace.relativize(file));
                     }
 
                     return FileVisitResult.CONTINUE;
                 }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                }
+
             });
 
+            results.sort(Path::compareTo);
+
             if (results.isEmpty()) {
-                return ToolResult.failure("No file or folder found with this name.");
+                return ToolResult.failure("No file or folder found.");
             }
 
-            String response = searchFileResponse(results);
+            String response = """
+                    Found %d match(es):
+                    %s
+                    """.formatted(
+                    results.size(),
+                    results.stream()
+                            .map(Path::toString)
+                            .collect(Collectors.joining("\n"))
+            );
 
             return ToolResult.success(response);
         } catch (IOException e) {
-            return ToolResult.failure("Error while searching files: " + e.getMessage());
+            return ToolResult.failure("Search failed: " + e.getMessage());
         }
     }
 
     public ToolResult listDirectory(String relativePath) throws IOException {
-        Path path = resolve(relativePath);
+        Path directory = validateExistingPath(relativePath);
 
-        if (!exists(path)) {
-            throw new FileNotFoundException("File does not exist: " + path);
+        if (!Files.isDirectory(directory)) {
+            throw new NotAFileException("Path is not a directory: " + relativePath);
         }
 
-        if (isFile(path)) {
-            throw new NotAFileException("Path is not a directory: " + path);
-        }
+        Path workspace = getWorkspace();
 
-        try (Stream<Path> directories = Files.list(path)) {
-            List<Path> results = directories
-                                    .filter(directory -> !isIgnored(directory))
-                                    .collect(Collectors.toList());
+        try (Stream<Path> stream = Files.list(directory)) {
+            List<Path> items = stream
+                    .filter(path -> !isIgnored(path))
+                    .sorted()
+                    .toList();
 
-            if (results.isEmpty()) {
-                return ToolResult.failure("No file or folder found in this folder");
-            }
+            String response = """
+                    Directory:
+                    %s
 
-            String response = listDirectoryResponse(path, results);
+                    Items:
+                    %s
+                    """.formatted(
+                    workspace.relativize(directory),
+                    items.isEmpty()
+                            ? "(empty)"
+                            : items.stream()
+                                    .map(path -> "- %s (%s)".formatted(
+                                            path.getFileName(),
+                                            Files.isDirectory(path)
+                                                    ? "Directory"
+                                                    : "File"))
+                                    .collect(Collectors.joining("\n"))
+            );
 
             return ToolResult.success(response);
         }
