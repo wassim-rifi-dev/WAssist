@@ -2,8 +2,12 @@ package dev.wassim.wassist.agent.tools.services;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -79,7 +83,7 @@ public class FileToolServices {
         return Files.isRegularFile(path);
     }
 
-    private boolean isEgnored(Path path) {
+    private boolean isIgnored(Path path) {
         return workspaceConfig.getIgnoredDirectories().contains(path.getFileName().toString());
     }
 
@@ -98,12 +102,34 @@ public class FileToolServices {
     }
 
     public ToolResult searchFile(String query) {
-        try (Stream<Path> paths = Files.walk(getWorkspace())) {
-            List<Path> results = paths
-                                .filter(path -> !isEgnored(path))
-                                .filter(path -> path.getFileName().toString().equalsIgnoreCase(query))
-                                .map(path -> getWorkspace().relativize(path))
-                                .collect(Collectors.toList());
+        Path workspace = getWorkspace();
+        List<Path> results = new ArrayList<>();
+
+        try {
+            Files.walkFileTree(workspace, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attributes) {
+                    if (!directory.equals(workspace) && isIgnored(directory)) {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+
+                    if (!directory.equals(workspace)
+                            && directory.getFileName().toString().equalsIgnoreCase(query)) {
+                        results.add(workspace.relativize(directory));
+                    }
+
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
+                    if (file.getFileName().toString().equalsIgnoreCase(query)) {
+                        results.add(workspace.relativize(file));
+                    }
+
+                    return FileVisitResult.CONTINUE;
+                }
+            });
 
             if (results.isEmpty()) {
                 return ToolResult.failure("No file or folder found with this name.");
@@ -130,7 +156,7 @@ public class FileToolServices {
 
         try (Stream<Path> directories = Files.list(path)) {
             List<Path> results = directories
-                                    .filter(directory -> !isEgnored(directory))
+                                    .filter(directory -> !isIgnored(directory))
                                     .collect(Collectors.toList());
 
             if (results.isEmpty()) {
