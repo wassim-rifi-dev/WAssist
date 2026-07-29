@@ -123,7 +123,7 @@ public class FileToolServices {
 
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
-                    if (file.getFileName().toString().equalsIgnoreCase(query)) {
+                    if (file.getFileName().toString().contains(query)) {
                         results.add(workspace.relativize(file));
                     }
 
